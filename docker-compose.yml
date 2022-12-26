@@ -1,0 +1,85 @@
+version: '3.8'
+services: 
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=$UID
+      - PGID=$GID
+      - TZ=Europe/Paris
+      - WEBUI_PORT=8080
+    volumes:
+      - $VOL_STORAGE/config/qbittorrent:/config
+      - $VOL_STORAGE/downloads:/downloads
+    ports:
+      - 8080:8080
+      - 6881:6881
+      - 6881:6881/udp
+    restart: unless-stopped
+  jackett:
+    image: lscr.io/linuxserver/jackett:latest
+    container_name: jackett
+    environment:
+      - PUID=$UID
+      - PGID=$GID
+      - TZ=Europe/Paris
+      - AUTO_UPDATE=true
+    volumes:
+      - $VOL_STORAGE/config/jackett:/config
+      - $VOL_STORAGE/downloads:/downloads
+    ports:
+      - 9117:9117
+    restart: unless-stopped
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=$UID
+      - PGID=$GID
+      - TZ=Europe/Paris
+    volumes:
+      - $VOL_STORAGE/config/sonarr:/config
+      - $VOL_STORAGE/media/tv:/tv
+      - $VOL_STORAGE/downloads:/downloads
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=$UID
+      - PGID=$GID
+      - TZ=Europe/Paris
+    volumes:
+      - $VOL_STORAGE/config/radarr:/config
+      - $VOL_STORAGE/media/movies:/movies
+      - $VOL_STORAGE/downloads:/downloads
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+
+    environment:
+      - PUID=$UID
+      - PGID=$GID
+      - TZ=Europe/Paris
+      - VERSION=docker
+      - PLEX_CLAIM=$PLEX_CLAIM
+    ports:
+      - 32400:32400
+      - 1900:1900
+      - 3005:3005
+      - 5353:5353
+      - 8324:8324
+      - 32410:32410
+      - 32412:32412
+      - 32413:32413
+      - 32414:32414
+      - 32469:32469
+    volumes:
+      - $VOL_STORAGE/config/plex:/config
+      - $VOL_STORAGE/media:/data
+    restart: unless-stopped
