@@ -1,12 +1,37 @@
 version: '3.8'
 services: 
+  wireguard:
+    image: lscr.io/linuxserver/wireguard:latest
+    container_name: wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=$UID
+      - PGID=$GID
+      - TZ=$TZ
+      - SERVERURL=wireguard.baschen.is #optional
+      - SERVERPORT=51820 #optional
+      - PEERDNS=auto #optional
+      - INTERNAL_SUBNET=10.13.13.0 #optional
+      - ALLOWEDIPS=0.0.0.0/0 #optional
+      - PERSISTENTKEEPALIVE_PEERS= #optional
+      - LOG_CONFS=true #optional
+    volumes:
+      - $VOL_STORAGE/config/wireguard:/config
+      - /lib/modules:/lib/modules #optional
+    ports:
+      - 51820:51820/udp
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    restart: unless-stopped
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
     environment:
       - PUID=$UID
       - PGID=$GID
-      - TZ=Europe/Paris
+      - TZ=$TZ
       - WEBUI_PORT=8080
     volumes:
       - $VOL_STORAGE/config/qbittorrent:/config
@@ -16,13 +41,14 @@ services:
       - 6881:6881
       - 6881:6881/udp
     restart: unless-stopped
+    network_mode: service:wireguard
   jackett:
     image: lscr.io/linuxserver/jackett:latest
     container_name: jackett
     environment:
       - PUID=$UID
       - PGID=$GID
-      - TZ=Europe/Paris
+      - TZ=$TZ
       - AUTO_UPDATE=true
     volumes:
       - $VOL_STORAGE/config/jackett:/config
@@ -36,7 +62,7 @@ services:
     environment:
       - PUID=$UID
       - PGID=$GID
-      - TZ=Europe/Paris
+      - TZ=$TZ
     volumes:
       - $VOL_STORAGE/config/sonarr:/config
       - $VOL_STORAGE/media/tv:/tv
@@ -50,7 +76,7 @@ services:
     environment:
       - PUID=$UID
       - PGID=$GID
-      - TZ=Europe/Paris
+      - TZ=$TZ
     volumes:
       - $VOL_STORAGE/config/radarr:/config
       - $VOL_STORAGE/media/movies:/movies
@@ -65,7 +91,7 @@ services:
     environment:
       - PUID=$UID
       - PGID=$GID
-      - TZ=Europe/Paris
+      - TZ=$TZ
       - VERSION=docker
       - PLEX_CLAIM=$PLEX_CLAIM
     ports:
